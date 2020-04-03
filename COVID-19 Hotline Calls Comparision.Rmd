@@ -1,0 +1,174 @@
+---
+title: "COVID-19 H0tline Calls Comparision"
+author: "C. Chavarria"
+date: "4/3/2020"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+
+
+```{r, include=FALSE}
+library(tidyverse)
+library(plotly)
+library(readr)
+library(readxl)
+library(janitor)
+library(DescTools)
+library(DT)
+library(flexdashboard)
+library(knitr)
+
+```
+
+
+```{r, include=FALSE}
+Hotline_Callers <- read_excel("P:/Internal Reports/Ed/Hotline Calls/Hotline Callers.xlsx")
+```
+
+
+
+Row {data-height=300}
+-----------------------------------------------------------------------
+```{r, results="hide"}
+HotlinePeople<-subset(Hotline_Callers,!Hotline_Callers$`Full Name`  %like% "%ANONProvider%")
+HotlinePeople<-subset(Hotline_Callers,!Hotline_Callers$`Caller Type`=="Provider")
+HotlinePeople<-distinct(HotlinePeople, `Client ID1`, .keep_all = TRUE)
+```
+
+```{r,  results="hide"}
+sum(Hotline_Callers$`Client ID`)
+n_distinct(Hotline_Callers$`Client ID1`)
+```
+
+
+
+
+```{r,results="hide"}
+Hotline_Callers$EnrollDate<-as.character.Date(Hotline_Callers$`Enroll Date`)
+```
+
+
+
+```{r,results="hide"}
+Hotline_Callers<-Hotline_Callers%>%
+  mutate(Week=case_when(
+      EnrollDate<= "2020-01-05"~ "Week 01",
+      EnrollDate<= "2020-01-12"~ "Week 02",
+      EnrollDate<= "2020-01-19"~ "Week 03",
+      EnrollDate<= "2020-01-26"~ "Week 04",
+      EnrollDate<= "2020-02-02"~ "Week 05",
+      EnrollDate<= "2020-02-09"~ "Week 06",
+      EnrollDate<= "2020-02-16"~ "Week 07",
+      EnrollDate<= "2020-02-23"~ "Week 08",
+      EnrollDate<= "2020-03-01"~ "Week 09",
+      EnrollDate<= "2020-03-08"~ "Week 10",
+      EnrollDate<= "2020-03-15"~ "Week 11",
+      EnrollDate<= "2020-03-22"~ "Week 12",
+      EnrollDate<= "2020-03-31"~"Week 13",
+    ))
+```
+
+
+
+```{r, results="hide"}
+Unduplicated<-Hotline_Callers%>%
+  distinct(`Client ID1`, .keep_all = TRUE)
+```
+
+
+
+```{r, results="hide"}
+TotalCallsBargraph<-Hotline_Callers%>%
+  group_by(Week)%>%
+  summarize("Total" = sum(`Client ID`))%>%
+  spread(Week, Total)
+```
+
+
+
+```{r, results="hide"}
+TotalPeopleBargraph<-Unduplicated%>%
+  group_by(Week)%>%
+  summarize("Total" = sum(`Client ID`))%>%
+  spread(Week, Total)
+```
+
+
+```{r, results="hide"}
+Combine<-rbind(TotalPeopleBargraph, TotalCallsBargraph)
+```
+```{r, results="hide"}
+Combine<-t(Combine)
+```
+
+```{r, results="hide"}
+Combine<-as.data.frame(Combine)
+```
+
+```{r}
+Combine<-Combine%>%
+  rownames_to_column()
+```
+
+
+```{r, results="hide"}
+colnames(Combine)<-c("Week", "Total Served", "Number of Callers")
+```
+
+```{r}
+Jan<-Hotline_Callers%>%
+  filter(`Enroll Date`< "2020-01-31")
+Feb<-Hotline_Callers%>%
+  filter(`Enroll Date`>"2020-01-31"& `Enroll Date`< "2020-02-29")
+March<-Hotline_Callers%>%
+  filter(`Enroll Date`>"2020-02-29" & `Enroll Date`< "2020-03-31"  )
+```
+
+
+
+
+
+
+### Jan Average Calls Per Day
+```{r}
+valueBox(round(sum(Jan$`Client ID`)/31), icon = "fa-poll", color = "blue", )
+```
+
+### Feb Average Calls Per Day
+
+```{r}
+valueBox(round(sum(Jan$`Client ID`)/29), icon = "phone", color = "plum", )
+```
+
+### March Average Calls Per Day
+
+```{r}
+valueBox(round(sum(March$`Client ID`)/31), icon = "fa-poll", color = "purple", )
+```
+
+
+
+row {data-height=600}
+-----------------------------------------------------------------------
+
+### Hotline Calls 
+
+
+```{r}
+plot_ly(Combine, x= Combine$Week, y= Combine$`Total Served`, name="Number of People Served",  type="bar",marker=list(color="blue")
+        )%>%
+  add_trace(y=Combine$`Number of Callers`, text=Combine$`Total Served`, marker=list(color="purple"))%>%
+  layout(yaxis=list(title="Hotline Callers"), barmode="group")
+
+ 
+
+```
+
+###
+
+```{r}
+kable(Combine)
+```
+
+
