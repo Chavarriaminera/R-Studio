@@ -1,0 +1,149 @@
+---
+title: "The Effects of Family Clothing Store Sales on Women's Apparel Sales: A Statistical Investigation"
+output:
+  word_document: default
+  mainfont: Times New Roman
+  html_document: default
+date: "2023-10-28"
+---
+
+# Intro
+This analysis explores the relationship between family and women's clothing sales. The study aims to determine whether family clothing sales can serve as a predictor of women's clothing sales.
+
+Alternative Hypothsis: Family clothing sales will predict womens clothing sales.
+Null Hypothesis: There will be no association between family and womens clothing sales.
+
+### Libraries
+
+These are the libraries I used for the project.
+```{r }
+library(ggplot2)
+library(readxl)
+library(knitr)
+library(ggplot2)
+library(ggrepel)
+```
+
+### Where I Got the Data From       
+
+In the link below you can see where I got the data from.
+
+```{r cars1, message=FALSE }
+Original <- read_excel("~/Documents/Data/Retail_Salse/mrtssales92-present.xlsx")
+
+## https://www.census.gov/retail/sales.html
+```
+
+# Cleaning the data
+
+In this block of code I am doing data selction, column labeling, and tabylar presentation. In the first like fo code, I am narrowing down the dataset by selecting specific rows (from 6-110) and columns (from 2 to 10) to create a new dataset called Modify. This helps to focus on the relevant subset of data for further analysis.
+
+In the second, line of code, I am assigning meaningful column names to the modify dataset. The names represent different months in the year 2023, making the data more interpretable.
+
+In the final line of code, I'm further refining the data set by selecting only the rows that are needed (rows 37 and 38), which could represent specific categories or information of interest.
+
+Finally, the kable function is used to present the final dataset in a formatted tabular view, making it easier to read and analyze the selected data.
+```{r cleaningTheCode}
+Modify<-Original[6:110,2:10]
+
+colnames(Modify)<-c("Category" ,"Jan_2023","Feb_2023","March_2023","April_2023","May_2023", "June_2023","July_2023", "Aug_2023")
+
+Final<-Modify[37:38,]
+
+```
+
+```{r CleaningTable}
+
+kable(Final)
+```
+
+
+In the step below, I am transposing the data using the t() function to reoganize it. Transposing the data changes the orientation of the dataset, making it suitable for analysis by switching rows to columns and columns to rows. This transformation allows for a more structured and convient format for further data analysis
+```{r transposing}
+Final1<-t(Final) 
+
+```
+
+Due to the transformation in the step above, the column names needed to be adjusted to reflect the new arrangement in the code below. Specifically, I renamed the columns as 'WomenClothingStores' and 'FamilyClothingStores' to better describe the data. Next, I further refined the dataset by selecting rows 2 to 9, capturing the relevant information. Finally, I converted the modified data into a data frame, making it ready for analysis and visualization.
+
+```{r cleaningthefinaltable}
+colnames(Final1)<-c("WomenClothingStores","FamilyClothingStores")
+Final1<-Final1[2:9,]
+Final1<<- as.data.frame(Final1)
+```
+
+In this step, I converted the values of 'WomenClothingStores' and 'FamilyClothingStores' to numeric data types. This transformation is necessary to prepare the data for parametric analysis, enabling the use of statistical tests and techniques that require numeric inputs.
+```{r numeric}
+Final1$WomenClothingStores<-as.numeric(Final1$WomenClothingStores)
+Final1$FamilyClothingStores<-as.numeric(Final1$FamilyClothingStores)
+
+```
+
+The table below illustrates the outcomes of the data wrangling process, showing the transformed and refined data ready for analysis.
+
+```{r table}
+kable(Final1)
+```
+
+# Analysis
+
+### Plot
+I created a scatterplot to visualize the relationship between the variables in the table. This plot provides a visual representation of how 'WomenClothingStores' and 'FamilyClothingStores' are related and allows for a quick assessment of any patterns or trends.
+
+```{r scatterplot}
+
+ggplot(Final1, aes(x = WomenClothingStores, y = FamilyClothingStores)) +
+  geom_point(size = 6, color = "pink") +
+  geom_text_repel(label = rownames(Final1),  size=2.0 ) +
+   labs(
+title = "Family and Women's Shopping Behavior"
+  )+ 
+  theme(
+    plot.title = element_text(color = "#0099f9", size = 12, face = "bold", hjust = 0.5),
+  
+  )
+
+
+```
+
+### Correlation
+
+The correlation analysis indicates a highly significant and strong association between 'WomenClothingStores' and 'FamilyClothingStores,' with a correlation coefficient of approximately 0.835. This suggests a positive relationship between the two variables, indicating that changes in women's clothing store sales are closely related to changes in family clothing store sales.
+
+```{r correlation}
+cor(Final1$WomenClothingStores, Final1$FamilyClothingStores)
+
+## Correlation chart https://sphweb.bumc.bu.edu/otlt/MPH-Modules/PH717-QuantCore/PH717-Module9-Correlation-Regression/PH717-Module9-Correlation-Regression4.html 
+```
+
+
+### Linear Regression 
+
+In this model, I am predicting women's clothing store sales (WomenClothingStores) based on family clothing store sales (FamilyClothingStores). The regression model assess how effectively variations in family clothing store sales can explain or predict changes in women's clothing store sales.
+
+```{r regressionModel}
+RetailModelFamilyPredicitngWomen <- lm(Final1$WomenClothingStores ~ Final1$FamilyClothingStores)
+
+```
+
+
+
+# Results
+
+ 
+For my model the F-statistic is 13.84, and the associated p-value is 0.009854, which is less than the significance level of 0.05, indicating that the model is statistically significant.
+This result suggests that the model is statistically significant, indicating a meaningful relationship between family clothing store sales and women's clothing store sales.
+
+
+```{r Summary}
+
+summary(RetailModelFamilyPredicitngWomen )
+ 
+```
+
+Based on my linear regression model, I can use it to predict women's clothing store sales based on family clothing store sales. The coefficient for 'FamilyClothingStores' in my model is 0.22602, indicating that for each unit increase in family clothing store sales, women's clothing store sales are expected to increase by approximately 0.22602 units. This positive coefficient implies a direct and proportional relationship between family clothing store sales and women's clothing store sales. In simple terms, when family clothing store sales increase, it is likely that women's clothing store sales will also increase, reflecting a positive association between the two variables
+
+```{r coefficenits}
+RetailModelFamilyPredicitngWomen$coefficients
+
+```
