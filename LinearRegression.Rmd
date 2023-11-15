@@ -87,24 +87,6 @@ kable(Final1)
 
 # Analysis
 
-### Plot
-I created a scatterplot to visualize the relationship between the variables in the table. This plot provides a visual representation of how 'WomenClothingStores' and 'FamilyClothingStores' are related and allows for a quick assessment of any patterns or trends.
-
-```{r scatterplot}
-
-ggplot(Final1, aes(x = WomenClothingStores, y = FamilyClothingStores)) +
-  geom_point(size = 6, color = "pink") +
-  geom_text_repel(label = rownames(Final1),  size=2.0 ) +
-   labs(
-title = "Family and Women's Shopping Behavior"
-  )+ 
-  theme(
-    plot.title = element_text(color = "#0099f9", size = 12, face = "bold", hjust = 0.5),
-  
-  )
-
-
-```
 
 ### Correlation
 
@@ -128,11 +110,11 @@ RetailModelFamilyPredicitngWomen <- lm(Final1$WomenClothingStores ~ Final1$Famil
 
 
 
-# Results
+# Linear Model
 
  
 For my model the F-statistic is 13.84, and the associated p-value is 0.009854, which is less than the significance level of 0.05, indicating that the model is statistically significant.
-This result suggests that the model is statistically significant, indicating a meaningful relationship between family clothing store sales and women's clothing store sales.
+This result suggests that the model is statistically significant, indicating a meaningful relationship between family clothing store sales and women's clothing store sales. However, we would need to check if the regression model meets assumptions. 
 
 
 ```{r Summary}
@@ -141,9 +123,42 @@ summary(RetailModelFamilyPredicitngWomen )
  
 ```
 
-Based on my linear regression model, I can use it to predict women's clothing store sales based on family clothing store sales. The coefficient for 'FamilyClothingStores' in my model is 0.22602, indicating that for each unit increase in family clothing store sales, women's clothing store sales are expected to increase by approximately 0.22602 units. This positive coefficient implies a direct and proportional relationship between family clothing store sales and women's clothing store sales. In simple terms, when family clothing store sales increase, it is likely that women's clothing store sales will also increase, reflecting a positive association between the two variables
+# Spearman 
+Based on the plots, we can see that they violete the assumptions. For example, in the first plot there is curvature associated with the residual or error terms. The second plot the data the data looks fairly normal, but in the third plot there is curvature which indicates non-linearity. Therefore, the data does not fit a linear regresion model and a different tool would be needed to better fit the model. 
 
-```{r coefficenits}
-RetailModelFamilyPredicitngWomen$coefficients
+```{r coefficenits, warning = FALSE }
 
+Plot<-plot(RetailModelFamilyPredicitngWomen)
+
+
+```
+
+
+
+
+The Spearman's rank correlation coefficient (rho) is a measure of the strength and direction of a monotonic relationship between two variables. Here's the interpretation of the output you provided:
+
+Correlation Coefficient (rho): The calculated Spearman's rank correlation coefficient (rho) is approximately 0.4524.
+
+Interpretation: The value of rho is positive, indicating a positive relationship between WomenClothingStores and FamilyClothingStores. As one variable increases, the other tends to increase as well.
+Test Statistic (S): The test statistic (S) is 46.
+Interpretation: This statistic is used in the calculation of the p-value. It is not directly interpretable on its own.
+
+P-value: The p-value associated with the test is 0.2675.
+Interpretation: The p-value is relatively high (greater than the commonly used significance level of 0.05), suggesting that there is not enough evidence to reject the null hypothesis. The null hypothesis is that there is no significant correlation between WomenClothingStores and FamilyClothingStores. In other words, the observed correlation could plausibly occur by random chance.
+
+Alternative Hypothesis: The alternative hypothesis is that the true Spearman's rank correlation (rho) is not equal to 0.
+Interpretation: The analysis is testing whether there is a significant non-zero correlation between the two variables.
+Sample Estimate: The sample estimate of rho is 0.4524.
+Interpretation: This is the estimated population value of the correlation coefficient based on the sample data. In this case, the positive value suggests a moderate positive relationship between the two variables.
+
+In summary, based on the given output, there is a positive correlation between WomenClothingStores and FamilyClothingStores, but the evidence for this correlation is not statistically significant at the 0.05 significance level (p-value > 0.05).
+
+
+
+
+```{r Summary Spearman, warning = FALSE }
+corr <- cor.test(x=Final1$WomenClothingStores, y=Final1$FamilyClothingStores, method = 'spearman')
+
+corr
 ```
