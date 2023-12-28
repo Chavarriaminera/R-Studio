@@ -1,0 +1,38 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+drawChristmasTree<-function(width,symbol="*"){
+  
+  if(width %% 2 ==0){
+    stop("Width should be an odd number for a symmetric tree.")
+  }
+  for (i in 1:width){
+    if(i %% 2 == 1){
+      spaces <-(width - i) %/% 2
+      stars<- i
+      line<-paste0(
+        paste0(rep(" ", spaces), collapse = ""),
+        paste0(rep(symbol,stars),collapse = ""),
+        paste0(rep(" ",spaces),collapse = ""),
+        "\n"
+      )
+      cat(line)
+    }
+  }
+  trunk_width<-width %/% 3
+  trunk_spaces<-(width - 1) %/% 2
+  cat(rep(" ", trunk_spaces), "|","\n",sep = "")
+}
+
+
+```
+
+```{r}
+drawChristmasTree(33)
+```
+
